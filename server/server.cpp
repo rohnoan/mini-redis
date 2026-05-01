@@ -4,53 +4,47 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <cstring>
+#include <thread>
+#include "parser/parser.h"
+#include "client_handler/handler.h"
+#include "store/store.h"
 using namespace std;
 Server::Server(int port){
     this->port=port;
     this->server_fd=-1;
-}
+} 
 void Server::start(){
     //socket
-    server_fd=socket(AF_INET,SOCK_STREAM,0);
+    server_fd=socket(AF_INET,SOCK_STREAM,0); //this creates tcp socket
 
     //address
     sockaddr_in address;
-    address.sin_family=AF_INET;
-    address.sin_addr.s_addr=INADDR_ANY;
-    address.sin_port=htons(port);
+    address.sin_family=AF_INET; //ipv4
+    address.sin_addr.s_addr=INADDR_ANY; //accept any ip
+    address.sin_port=htons(port); //bind ip to port
 
     //bind
-    bind(server_fd,(struct sockaddr*)&address,sizeof(address));
+    bind(server_fd,(struct sockaddr*)&address,sizeof(address)); //simple binding function
 
     //listen
-    listen(server_fd,3);
+    listen(server_fd,3); //simple listen function
 
     std::cout<<"server running on port "<<port<<endl;
 
-    //accept
-    sockaddr_in client_addr;
-    socklen_t  client_len = sizeof(client_addr);
-
-    int client_socket=accept(server_fd,(struct sockaddr*)&client_addr, &client_lein);
-
-    cout<<"client connected"<<endl;
-
-    char buffer[1024];
-
     while(true){
-        memset(buffer,0,sizeof(buffer));
-        int bytes=recv(client_socket,buffer,sizeof(buffer),0);
+        sockaddr_in client_addr;
+        socklen_t client_len =sizeof(client_addr);
 
-        if(bytes<=0){
-            cout<<"client disconnected"<<endl;
-            break;
+        int client_socket=accept(server_fd,(struct sockaddr*)&client_addr, &client_len);
+
+        if(client_socket<0){
+            cout<<"accept failed"<<endl;
+            continue;
         }
-        cout<<"received "<<buffer<<endl;
+        cout<<"client connected"<<endl;
 
-        send(client_socket,buffer,strlen(buffer),0);
-
-        
+        thread t(handle_client,client_socket);
+        t.detach();
     }
-    close(client_socket);
     close(server_fd);
 }
