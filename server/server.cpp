@@ -8,6 +8,8 @@
 #include "parser/parser.h"
 #include "client_handler/handler.h"
 #include "store/store.h"
+#include "persistence/aof.h"
+
 using namespace std;
 Server::Server(int port){
     this->port=port;
@@ -15,6 +17,8 @@ Server::Server(int port){
 } 
 void Server::start(){
     //socket
+    AOF aof;
+    aof.load();
     server_fd=socket(AF_INET,SOCK_STREAM,0); //this creates tcp socket
 
     //address
@@ -24,6 +28,10 @@ void Server::start(){
     address.sin_port=htons(port); //bind ip to port
 
     //bind
+    if(bind(server_fd,(struct sockaddr*)&address,sizeof(address)) < 0){
+        perror("bind failed");
+        return;
+    }
     bind(server_fd,(struct sockaddr*)&address,sizeof(address)); //simple binding function
 
     //listen

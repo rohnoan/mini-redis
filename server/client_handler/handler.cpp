@@ -2,11 +2,12 @@
 #include <sys/socket.h>
 #include "../parser/parser.h"
 #include "../store/store.h"
+#include "../persistence/aof.h"
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
 using namespace std;
-
+AOF aof;
 Parser parser;
 Store store;
 
@@ -31,10 +32,14 @@ void handle_client(int client_socket){
         string response;
 
         if (command == "SET") {
-            if(tokens.size()==3)response=store.set(tokens[1],tokens[2]);
+            if(tokens.size()==3){
+                response=store.set(tokens[1],tokens[2]);
+                aof.append(input);
+            }
             else if(tokens.size()==5 && tokens[3]=="EX"){
                 int ttl=stoi(tokens[4]);
                 response=store.set(tokens[1],tokens[2],ttl);
+                aof.append(input);
             }else response="ERROR";
         }
         else if (command == "GET" && tokens.size() == 2) {
@@ -42,6 +47,7 @@ void handle_client(int client_socket){
         }
         else if (command == "DEL" && tokens.size() == 2) {
             response = store.del(tokens[1]);
+            aof.append(input);
         }
         else {
             response = "ERROR";
