@@ -30,8 +30,12 @@ void handle_client(int client_socket){
         string command=tokens[0];
         string response;
 
-        if (command == "SET" && tokens.size() == 3) {
-            response = store.set(tokens[1], tokens[2]);
+        if (command == "SET") {
+            if(tokens.size()==3)response=store.set(tokens[1],tokens[2]);
+            else if(tokens.size()==5 && tokens[3]=="EX"){
+                int ttl=stoi(tokens[4]);
+                response=store.set(tokens[1],tokens[2],ttl);
+            }else response="ERROR";
         }
         else if (command == "GET" && tokens.size() == 2) {
             response = store.get(tokens[1]);
