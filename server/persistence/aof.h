@@ -7,6 +7,7 @@ class AOF{
     public: 
     void append(const string &command);
     void load();
+    void rewrite();
 };
 
 #endif

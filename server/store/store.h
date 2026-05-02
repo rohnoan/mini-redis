@@ -11,6 +11,7 @@ class Store{
         string set(const string &key, const string & value,int ttl=-1);
         string get(const string &key);
         string del(const string &key);
+        unordered_map<string,string> get_all();
     private:
         unordered_map<string,string>data;
         unordered_map<string,time_t>expiry;

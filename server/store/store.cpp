@@ -20,7 +20,10 @@ string Store::set(const string &key,const string &value,int ttl){
     else expiry.erase(key);
     return "OK";
 }
-
+unordered_map<string, string> Store::get_all() {
+    lock_guard<mutex> lock(mtx);
+    return data;
+}
 string Store::get(const string &key){
     lock_guard<mutex>lock(mtx);
 

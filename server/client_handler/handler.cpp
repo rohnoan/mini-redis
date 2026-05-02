@@ -48,6 +48,9 @@ void handle_client(int client_socket){
         else if (command == "DEL" && tokens.size() == 2) {
             response = store.del(tokens[1]);
             aof.append(input);
+        }else if (command == "REWRITE") {
+            aof.rewrite();
+            response = "OK";
         }
         else {
             response = "ERROR";

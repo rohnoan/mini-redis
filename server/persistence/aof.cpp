@@ -14,7 +14,17 @@ void AOF::append(const string&command){
     file<<command<<endl;
     file.close();
 }
+void AOF::rewrite() {
+    ofstream file("appendonly.aof", ios::trunc); // overwrite
 
+    auto all_data = store.get_all();
+
+    for (auto &pair : all_data) {
+        file << "SET " << pair.first << " " << pair.second << "\n";
+    }
+
+    file.close();
+}
 void AOF::load(){
     ifstream file("appendonly.aof");
 
