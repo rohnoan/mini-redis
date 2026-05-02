@@ -24,6 +24,17 @@ unordered_map<string, string> Store::get_all() {
     lock_guard<mutex> lock(mtx);
     return data;
 }
+void Store::cleanup_expired(){
+    lock_guard<mutex>lock(mtx);
+    time_t now=time(0);
+
+    for(auto it = expiry.begin();it!=expiry.end();){
+        if(now>it->second){
+            data.erase(it->first);
+            it=expiry.erase(it);
+        }else it++;
+    }
+}
 string Store::get(const string &key){
     lock_guard<mutex>lock(mtx);
 

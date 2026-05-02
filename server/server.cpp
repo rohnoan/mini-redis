@@ -9,15 +9,15 @@
 #include "client_handler/handler.h"
 #include "store/store.h"
 #include "persistence/aof.h"
-
+#include "utils/expiry.h"
+#include "utils/global.h"
 using namespace std;
 Server::Server(int port){
     this->port=port;
     this->server_fd=-1;
 } 
 void Server::start(){
-    //socket
-    AOF aof;
+    //socket 
     aof.load();
     server_fd=socket(AF_INET,SOCK_STREAM,0); //this creates tcp socket
 
@@ -28,15 +28,16 @@ void Server::start(){
     address.sin_port=htons(port); //bind ip to port
 
     //bind
+    int opt = 1;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
     if(bind(server_fd,(struct sockaddr*)&address,sizeof(address)) < 0){
         perror("bind failed");
         return;
     }
-    bind(server_fd,(struct sockaddr*)&address,sizeof(address)); //simple binding function
-
     //listen
     listen(server_fd,3); //simple listen function
-
+    start_expiry_thread();
     std::cout<<"server running on port "<<port<<endl;
 
     while(true){

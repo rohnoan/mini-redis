@@ -12,11 +12,11 @@ class Store{
         string get(const string &key);
         string del(const string &key);
         unordered_map<string,string> get_all();
+        void cleanup_expired();
     private:
         unordered_map<string,string>data;
         unordered_map<string,time_t>expiry;
         mutex mtx;
-
         bool is_expired(const string &key);
 };
 

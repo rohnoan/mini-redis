@@ -3,11 +3,8 @@
 #include <iostream>
 #include "../store/store.h"
 #include "../parser/parser.h"
-
+#include "../utils/global.h"
 using namespace std;
-
-extern Store store;
-extern Parser parser;
 
 void AOF::append(const string&command){
     ofstream file("appendonly.aof",ios::app);
